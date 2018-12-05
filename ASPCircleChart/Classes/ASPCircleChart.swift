@@ -41,7 +41,7 @@ A simple chart that uses slices on a circle to represent data.
 	/**
 	The starting angle in radians. Default value starts from the top.
 	*/
-	open var initialAngle: CGFloat = 3.0 * (.pi / 2.0)
+	open var initialAngle: CGFloat = 3.0 * (.pi / 2.0) + 0.07
 	
 	/**
 	The order in which slices are overlayed. By default the latest slice is on top of the previous one.
@@ -56,6 +56,16 @@ A simple chart that uses slices on a circle to represent data.
 	The cap style of the slices.
 	*/
 	open var lineCapStyle: LineCapStyle = .straight
+    
+    /**
+     The duration of the slice animation. Default value is 0.35.
+     */
+    open var animationDuration: Double = 0.35
+    
+    /**
+    The style of the beginning of the slice.
+    */
+    open var startCapStyle: LineCapStyle = .straight
 	
 	/**
 	The width of the circle.
@@ -131,6 +141,7 @@ A simple chart that uses slices on a circle to represent data.
 			slice.frame = bounds
 			slice.strokeWidth = circleWidth
 			slice.strokeColor = dataSource!.colorForDataPointAtIndex(oldCount + index)
+            slice.animationDuration = animationDuration
 			
 			switch lineCapStyle {
 			case .round:
@@ -142,6 +153,16 @@ A simple chart that uses slices on a circle to represent data.
 			if latestSliceOnTop == false {
 				slice.zPosition = CGFloat((oldCount + itemsToInsert) - index)
 			}
+            
+            if startCapStyle == .straight && index == 0 {
+                let maskLayer = ASPCircleChartSliceLayer()
+                maskLayer.frame = slice.bounds
+                maskLayer.strokeWidth = circleWidth
+                maskLayer.strokeColor = dataSource!.colorForDataPointAtIndex(oldCount + index)
+                maskLayer.animationDuration = animationDuration
+                maskLayer.lineCapStyle = .butt
+                slice.addSublayer(maskLayer)
+            }
 			
 			layer.addSublayer(slice)
 		}
@@ -183,6 +204,16 @@ A simple chart that uses slices on a circle to represent data.
 			
 			if dataPoint > 0.0 {
 				if endAngle - itemSpacing > startAngle {
+                    if let subSlice = (slice.sublayers?.filter({ (item) -> Bool in
+                        return item is ASPCircleChartSliceLayer
+                    }) as? [ASPCircleChartSliceLayer] ?? []).first {
+                        subSlice.startAngle = startAngle
+                        subSlice.endAngle = endAngle - itemSpacing - 1
+                        subSlice.strokeWidth = circleWidth
+                        subSlice.strokeColor = dataSource!.colorForDataPointAtIndex(index)
+                        subSlice.lineCapStyle = .square
+                    }
+                    
 					slice.startAngle = startAngle
 					slice.endAngle = endAngle - itemSpacing
 					slice.strokeWidth = circleWidth
@@ -190,12 +221,28 @@ A simple chart that uses slices on a circle to represent data.
 					
 					startAngle = endAngle
 				} else {
+                    if let subSlice = (slice.sublayers?.filter({ (item) -> Bool in
+                        return item is ASPCircleChartSliceLayer
+                    }) as? [ASPCircleChartSliceLayer] ?? []).first {
+                        subSlice.startAngle = startAngle
+                        subSlice.endAngle = startAngle + itemSpacing - 1
+                        subSlice.lineCapStyle = .square
+                    }
+                    
 					slice.startAngle = startAngle
 					slice.endAngle = startAngle + itemSpacing
 					
 					startAngle = startAngle + 2.0 * itemSpacing
 				}
 			} else {
+                if let subSlice = (slice.sublayers?.filter({ (item) -> Bool in
+                    return item is ASPCircleChartSliceLayer
+                }) as? [ASPCircleChartSliceLayer] ?? []).first {
+                    subSlice.startAngle = startAngle
+                    subSlice.endAngle = startAngle
+                    subSlice.lineCapStyle = .square
+                }
+                
 				slice.startAngle = startAngle
 				slice.endAngle = startAngle
 			}
