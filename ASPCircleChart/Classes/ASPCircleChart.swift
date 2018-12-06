@@ -41,7 +41,7 @@ A simple chart that uses slices on a circle to represent data.
 	/**
 	The starting angle in radians. Default value starts from the top.
 	*/
-	open var initialAngle: CGFloat = 3.0 * (.pi / 2.0) + 0.07
+	open var initialAngle: CGFloat = 3.0 * (.pi / 2.0)
 	
 	/**
 	The order in which slices are overlayed. By default the latest slice is on top of the previous one.
