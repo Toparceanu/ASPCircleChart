@@ -45,6 +45,16 @@ open class ASPCircleChartSliceLayer: CALayer {
 	The cap style of the slice.
 	*/
 	open var lineCapStyle: CGLineCap = .butt
+    
+    /**
+     The type of the slice
+    */
+    open var type: Int = 0
+    
+    /**
+    The cap style of the start of the slice.
+    */
+    open var startCapStyle: CGLineCap = .square
 	
 	public override init() {
 		super.init()
@@ -61,8 +71,10 @@ open class ASPCircleChartSliceLayer: CALayer {
 			strokeColor = layer.strokeColor
 			strokeWidth = layer.strokeWidth
 			lineCapStyle = layer.lineCapStyle
+            startCapStyle = layer.startCapStyle
 			animationDuration = layer.animationDuration
 			radiusOffset = layer.radiusOffset
+            type = layer.type
 		}
 	}
 	
@@ -78,13 +90,51 @@ open class ASPCircleChartSliceLayer: CALayer {
 		let centerPoint = CGPoint(x: bounds.midX, y: bounds.midY)
 		let radius = min(centerPoint.x, centerPoint.y) - (strokeWidth / 2.0) - radiusOffset
 		
-		let bezierPath = UIBezierPath(arcCenter: centerPoint, radius: radius, startAngle: startAngle, endAngle: endAngle, clockwise: true)
-		
-		strokeColor.setStroke()
-		
-		bezierPath.lineWidth = strokeWidth
-		bezierPath.lineCapStyle = lineCapStyle
-		bezierPath.stroke()
+        if startCapStyle == .round {
+            let bezierPath = UIBezierPath(arcCenter: centerPoint, radius: radius, startAngle: startAngle, endAngle: endAngle, clockwise: true)
+            
+            strokeColor.setStroke()
+            
+            bezierPath.lineWidth = strokeWidth
+            bezierPath.lineCapStyle = lineCapStyle
+            bezierPath.stroke()
+        } else {
+            if type == 1 {
+                let bezierPath = UIBezierPath(arcCenter: centerPoint, radius: radius, startAngle: startAngle, endAngle: endAngle, clockwise: true)
+                
+                strokeColor.setStroke()
+                
+                bezierPath.lineWidth = strokeWidth
+                bezierPath.lineCapStyle = lineCapStyle
+                bezierPath.stroke()
+            } else {
+                var firstBazierEndEngle: CGFloat
+                var secondBezierEndAngle: CGFloat
+                
+                if (endAngle - 0.04) < startAngle && endAngle != startAngle {
+                    firstBazierEndEngle = endAngle + 0.04
+                    secondBezierEndAngle = endAngle
+                } else if (endAngle == startAngle) {
+                    firstBazierEndEngle = endAngle
+                    secondBezierEndAngle = endAngle
+                } else {
+                    firstBazierEndEngle = endAngle
+                    secondBezierEndAngle = endAngle - 0.04
+                }
+                
+                let bezierPath = UIBezierPath(arcCenter: centerPoint, radius: radius, startAngle: startAngle, endAngle: firstBazierEndEngle, clockwise: true)
+                let bezierPath2 = UIBezierPath(arcCenter: centerPoint, radius: radius, startAngle: startAngle, endAngle: secondBezierEndAngle, clockwise: true)
+                
+                strokeColor.setStroke()
+                
+                bezierPath.lineWidth = strokeWidth
+                bezierPath2.lineWidth = strokeWidth
+                bezierPath.lineCapStyle = lineCapStyle
+                bezierPath2.lineCapStyle = startCapStyle
+                bezierPath.stroke()
+                bezierPath2.stroke()
+            }
+        }
 		
 		UIGraphicsPopContext()
 		
@@ -94,7 +144,7 @@ open class ASPCircleChartSliceLayer: CALayer {
 		if event == "startAngle" || event == "endAngle" {
 			let basicAnimation = CABasicAnimation(keyPath: event)
 			basicAnimation.fromValue = presentation()?.value(forKey: event)
-            basicAnimation.timingFunction = CAMediaTimingFunction(name: kCAMediaTimingFunctionEaseOut)
+            basicAnimation.timingFunction = CAMediaTimingFunction(name: .easeOut)
 			basicAnimation.duration = animationDuration
 			
 			return basicAnimation
