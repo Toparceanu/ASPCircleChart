@@ -111,15 +111,15 @@ open class ASPCircleChartSliceLayer: CALayer {
                 var firstBazierEndEngle: CGFloat
                 var secondBezierEndAngle: CGFloat
                 
-                if (endAngle - 0.05) < startAngle && endAngle != startAngle {
-                    firstBazierEndEngle = endAngle + 0.05
+                if (endAngle - 0.06) < startAngle && endAngle != startAngle {
+                    firstBazierEndEngle = endAngle + 0.06
                     secondBezierEndAngle = endAngle
                 } else if (endAngle == startAngle) {
                     firstBazierEndEngle = endAngle
                     secondBezierEndAngle = endAngle
                 } else {
                     firstBazierEndEngle = endAngle
-                    secondBezierEndAngle = endAngle - 0.05
+                    secondBezierEndAngle = endAngle - 0.06
                 }
                 
                 let bezierPath = UIBezierPath(arcCenter: centerPoint, radius: radius, startAngle: startAngle, endAngle: firstBazierEndEngle, clockwise: true)
