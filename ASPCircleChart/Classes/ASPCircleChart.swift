@@ -71,6 +71,16 @@ A simple chart that uses slices on a circle to represent data.
 	The width of the circle.
 	*/
 	@IBInspectable open var circleWidth: CGFloat = 10.0
+    
+    /**
+    The width of the second circle
+    */
+    @IBInspectable open var secondCircleWidth: CGFloat = 6.0
+    
+    /**
+    Set to True if the secondCircleWidth should be applied, default is False
+    */
+    open var shouldUseSecondCircleWidth: Bool = false
 	
 	/**
 	The spacing between items. Should be a value between 0.0 and 0.5.
@@ -107,8 +117,15 @@ A simple chart that uses slices on a circle to represent data.
 			return item is ASPCircleChartSliceLayer
 		}) {
 			
-			for slice in slices {
-				slice.frame = bounds
+            for index in 0..<slices.count {
+                if shouldUseSecondCircleWidth {
+                    slices[index].frame = index == 1 ? CGRect(x: bounds.minX + (circleWidth - secondCircleWidth)/2,
+                                                              y: bounds.minY + (circleWidth - secondCircleWidth)/2,
+                                                              width: bounds.width - (circleWidth - secondCircleWidth)/2,
+                                                              height: bounds.height - (circleWidth - secondCircleWidth)/2) : bounds
+                } else {
+                    slices[index].frame = bounds
+                }
 			}
 		}
 	}
@@ -138,8 +155,18 @@ A simple chart that uses slices on a circle to represent data.
 		
 		for index in 0..<itemsToInsert {
 			let slice = ASPCircleChartSliceLayer()
-			slice.frame = bounds
-			slice.strokeWidth = circleWidth
+            
+            if shouldUseSecondCircleWidth {
+                slice.frame = index == 1 ? CGRect(x: bounds.minX + (circleWidth - secondCircleWidth)/2,
+                                                  y: bounds.minY + (circleWidth - secondCircleWidth)/2,
+                                                  width: bounds.width - (circleWidth - secondCircleWidth)/2,
+                                                  height: bounds.height - (circleWidth - secondCircleWidth)/2) : bounds
+                slice.strokeWidth = index == 1 ? secondCircleWidth : circleWidth
+            } else {
+                slice.frame = bounds
+                slice.strokeWidth = circleWidth
+            }
+            
 			slice.strokeColor = dataSource!.colorForDataPointAtIndex(oldCount + index)
             slice.animationDuration = animationDuration
             slice.startCapStyle = startCapStyle == .round ? .round : .square
@@ -198,8 +225,13 @@ A simple chart that uses slices on a circle to represent data.
 				if endAngle - itemSpacing > startAngle {
 					slice.startAngle = startAngle
 					slice.endAngle = endAngle - itemSpacing
-					slice.strokeWidth = circleWidth
 					slice.strokeColor = dataSource!.colorForDataPointAtIndex(index)
+                    
+                    if shouldUseSecondCircleWidth {
+                        slice.strokeWidth = index == 1 ? secondCircleWidth : circleWidth
+                    } else {
+                        slice.strokeWidth = circleWidth
+                    }
 					
 					startAngle = endAngle
 				} else {
