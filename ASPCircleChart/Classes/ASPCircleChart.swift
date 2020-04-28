@@ -70,7 +70,7 @@ A simple chart that uses slices on a circle to represent data.
 	/**
 	The width of the circle.
 	*/
-	@IBInspectable open var circleWidth: CGFloat = 10.0
+	@IBInspectable open var circleWidth: CGFloat = 6.0
     
     /**
     The width of the second circle
